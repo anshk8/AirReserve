@@ -16,7 +16,7 @@ from langchain.memory import ConversationBufferMemory
 from dotenv import load_dotenv
 from .tools.mathTools import add_numbers
 from .tools.travelTools import search_destinations
-from SYSTEMPROMPT import system_prompt
+from .SYSTEMPROMPT import system_prompt
 
 # Load environment variables
 load_dotenv()
