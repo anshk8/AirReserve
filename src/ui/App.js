@@ -88,6 +88,16 @@ function App() {
     }
   };
 
+  const clearFilters = () => {
+    setFilters(null);
+    setMessage({ type: 'info', text: 'Filters cleared. Showing all available flights.' });
+    
+    // Clear message after 3 seconds
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+  };
+
 
 
 
@@ -162,7 +172,7 @@ function App() {
       </header>
       
       <main>
-        <BookingInterface filters={filters} />
+        <BookingInterface filters={{ ...filters, onClear: clearFilters }} />
       </main>
       
       <footer className="app-footer">

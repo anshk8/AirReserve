@@ -1,55 +1,43 @@
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import { fileURLToPath } from 'url';
+import flightDataProcessor from './src/api/flightDataProcessor.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize Express app
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API endpoint to get flight data
-app.get('/api/flights', (req, res) => {
-  // In a real app, this would fetch from a database or external API
-  const mockFlights = [
-    {
-      id: 1,
-      airline: 'Delta Airlines',
-      flightNumber: 'DL123',
-      origin: 'JFK',
-      destination: 'LAX',
-      departureTime: '2025-07-10T08:00:00-04:00',
-      arrivalTime: '2025-07-10T11:30:00-07:00',
-      price: 299.99,
-      seatsAvailable: 24
-    },
-    {
-      id: 2,
-      airline: 'United Airlines',
-      flightNumber: 'UA456',
-      origin: 'JFK',
-      destination: 'SFO',
-      departureTime: '2025-07-10T09:15:00-04:00',
-      arrivalTime: '2025-07-10T13:30:00-07:00',
-      price: 349.99,
-      seatsAvailable: 12
-    },
-    {
-      id: 3,
-      airline: 'American Airlines',
-      flightNumber: 'AA789',
-      origin: 'JFK',
-      destination: 'ORD',
-      departureTime: '2025-07-10T07:30:00-04:00',
-      arrivalTime: '2025-07-10T09:45:00-05:00',
-      price: 199.99,
-      seatsAvailable: 8
+app.get('/api/flights', async (req, res) => {
+  try {
+    const { origin, destination, maxPrice } = req.query;
+    
+    let flights;
+    
+    if (origin && destination) {
+      flights = await flightDataProcessor.getFlightsByRoute(origin, destination);
+    } else {
+      flights = await flightDataProcessor.getAllFlights();
     }
-  ];
-  
-  res.json(mockFlights);
+    
+    // Apply maxPrice filter if provided
+    if (maxPrice) {
+      flights = flights.filter(flight => flight.price <= parseFloat(maxPrice));
+    }
+    
+    res.json(flights);
+  } catch (error) {
+    console.error('Error fetching flights:', error);
+    res.status(500).json({ error: 'Failed to fetch flight data' });
+  }
 });
 
 // Serve the main HTML file for all other routes
