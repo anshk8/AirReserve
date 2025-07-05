@@ -1,40 +1,81 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import flightDataService from '../../services/flightDataService.js';
 import './styles.css';
 
 const BookingInterface = ({ filters }) => {
   const [loading, setLoading] = useState(true);
+  const [backgroundLoading, setBackgroundLoading] = useState(false);
   const [error, setError] = useState(null);
   const [bookingStatus, setBookingStatus] = useState(null);
   const [flights, setFlights] = useState([]);
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const intervalRef = useRef(null);
 
   // Fetch flights from API
-  useEffect(() => {
-    const fetchFlights = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        let flightData;
-        if (filters && (filters.from || filters.to || filters.maxPrice)) {
-          // Apply filters when user has provided search criteria
-          flightData = await flightDataService.searchFlights(filters);
-        } else {
-          // Show all flights initially
-          flightData = await flightDataService.getAllFlights();
-        }
-        
-        setFlights(flightData);
-      } catch (err) {
-        console.error('Error fetching flights:', err);
-        setError('Failed to load flight data. Please try again later.');
-      } finally {
-        setLoading(false);
+  const fetchFlights = async (showLoading = true, isBackground = false) => {
+    try {
+      if (showLoading) setLoading(true);
+      if (isBackground) setBackgroundLoading(true);
+      setError(null);
+      
+      let flightData;
+      if (filters && (filters.from || filters.to || filters.maxPrice)) {
+        // Apply filters when user has provided search criteria
+        flightData = await flightDataService.searchFlights(filters);
+      } else {
+        // Show all flights initially
+        flightData = await flightDataService.getAllFlights();
       }
-    };
+      
+      setFlights(flightData);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Error fetching flights:', err);
+      setError('Failed to load flight data. Please try again later.');
+    } finally {
+      if (showLoading) setLoading(false);
+      if (isBackground) setBackgroundLoading(false);
+    }
+  };
 
+  // Initial fetch
+  useEffect(() => {
     fetchFlights();
   }, [filters]);
+
+  // Auto-refresh functionality
+  useEffect(() => {
+    if (autoRefresh) {
+      // Set up polling every 10 seconds
+      intervalRef.current = setInterval(() => {
+        fetchFlights(false, true); // Background refresh with subtle indicator
+      }, 10000);
+    } else {
+      // Clear interval if auto-refresh is disabled
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }
+
+    // Cleanup interval on component unmount
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [autoRefresh, filters]);
+
+  // Toggle auto-refresh
+  const toggleAutoRefresh = () => {
+    setAutoRefresh(prev => !prev);
+  };
+
+  // Manual refresh
+  const handleManualRefresh = () => {
+    fetchFlights();
+  };
 
   // Apply filters to flights
   const filteredFlights = flights;
@@ -91,7 +132,34 @@ const BookingInterface = ({ filters }) => {
 
   return (
     <div className="booking-interface">
-      <h2>Available Flights {filters && (filters.from || filters.to || filters.maxPrice) && `(${filteredFlights.length})`}</h2>
+      <div className="interface-header">
+        <h2>Available Flights {filters && (filters.from || filters.to || filters.maxPrice) && `(${filteredFlights.length})`}</h2>
+        
+        {/* Auto-refresh controls */}
+        <div className="refresh-controls">
+          <div className="last-updated">
+            Last updated: {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            {backgroundLoading && <span className="updating-indicator"> • Updating...</span>}
+          </div>
+          <div className="refresh-buttons">
+            <button 
+              className={`auto-refresh-toggle ${autoRefresh ? 'active' : ''}`}
+              onClick={toggleAutoRefresh}
+              title={autoRefresh ? 'Disable auto-refresh' : 'Enable auto-refresh'}
+            >
+              {autoRefresh ? '🔄 Auto ON' : '⏸️ Auto OFF'}
+            </button>
+            <button 
+              className="manual-refresh"
+              onClick={handleManualRefresh}
+              disabled={loading || backgroundLoading}
+              title="Refresh now"
+            >
+              {backgroundLoading ? '⏳' : '🔄'} Refresh
+            </button>
+          </div>
+        </div>
+      </div>
       
       {bookingStatus && (
         <div className={`booking-status ${bookingStatus.type}`}>

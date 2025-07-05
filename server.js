@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'src/ui/public')));
 
 // API endpoint to get flight data
 app.get('/api/flights', async (req, res) => {
@@ -42,7 +42,7 @@ app.get('/api/flights', async (req, res) => {
 
 // Serve the main HTML file for all other routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'src/ui/public', 'index.html'));
 });
 
 // Start the server

@@ -1,3 +1,101 @@
+/* Auto-refresh controls */
+.interface-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.refresh-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.last-updated {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-style: italic;
+}
+
+.updating-indicator {
+  color: #00ff7f !important;
+  font-weight: 500;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.refresh-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.auto-refresh-toggle,
+.manual-refresh {
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff !important;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-weight: 500;
+}
+
+.auto-refresh-toggle:hover,
+.manual-refresh:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.auto-refresh-toggle.active {
+  background: rgba(0, 255, 127, 0.2);
+  border-color: rgba(0, 255, 127, 0.5);
+  color: #00ff7f !important;
+}
+
+.manual-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.manual-refresh:disabled:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .interface-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .refresh-controls {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .refresh-buttons {
+    flex-shrink: 0;
+  }
+}
+
 /* Base styles */
 .booking-container {
   max-width: 1200px;
