@@ -609,9 +609,60 @@ h1::after {
 /* No flights message */
 .no-flights {
   text-align: center;
-  padding: 3rem 1rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  color: #7f8c8d;
+  padding: 4rem 2rem;
+  background: rgba(10, 25, 41, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(192, 214, 228, 0.9);
+  font-size: 1.2rem;
+  margin: 2rem 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.no-flights::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.4), transparent);
+}
+
+.no-flights p {
+  color: rgba(192, 214, 228, 0.9) !important;
+  font-weight: 400;
+  line-height: 1.6;
+  margin-bottom: 2rem;
   font-size: 1.1rem;
+}
+
+.no-flights .clear-filters {
+  background: linear-gradient(135deg, #4ecdc4, #3aa8a0);
+  color: #0a1924;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+  font-size: 0.9rem;
+}
+
+.no-flights .clear-filters:hover {
+  background: linear-gradient(135deg, #3aa8a0, #2e8a82);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+}
+
+.no-flights .clear-filters:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(78, 205, 196, 0.3);
 }

@@ -187,10 +187,6 @@ code {
 
 /* Scroll indicator */
 .scroll-indicator {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -198,8 +194,33 @@ code {
   font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 2px;
+  margin-top: 2rem;
   opacity: 0;
   animation: fadeIn 0.5s ease-out 1s forwards;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.scroll-indicator:hover {
+  color: rgba(78, 205, 196, 0.9);
+  transform: translateY(-2px);
+}
+
+.scroll-indicator:hover .arrow {
+  border-color: var(--accent);
+  animation: bounceHover 1s infinite;
+}
+
+@keyframes bounceHover {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0) rotate(45deg);
+  }
+  40% {
+    transform: translateY(-8px) rotate(45deg);
+  }
+  60% {
+    transform: translateY(-4px) rotate(45deg);
+  }
 }
 
 .arrow {
@@ -233,7 +254,7 @@ code {
 /* Search form styles */
 .search-form {
   max-width: 1000px;
-  margin: 2rem auto 0;
+  margin: 4rem auto 0;
   background: rgba(255, 255, 255, 0.05);
   padding: 2.5rem;
   border-radius: 24px;
@@ -246,7 +267,7 @@ code {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  transform: translateY(30px);
+  transform: translateY(0);
   opacity: 0;
   animation: fadeInUp 0.8s ease-out 0.4s forwards;
   transition: all 0.3s ease;
@@ -468,9 +489,14 @@ code {
   }
   
   .search-form {
-    margin: 1.5rem 1rem 0;
+    margin: 3rem 1rem 0;
     padding: 1.25rem;
     gap: 1rem;
+  }
+  
+  .scroll-indicator {
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
   }
 }
 
@@ -484,7 +510,13 @@ code {
   }
   
   .search-form {
+    margin: 2.5rem 1rem 0;
     padding: 1rem;
+  }
+  
+  .scroll-indicator {
+    margin-top: 1rem;
+    font-size: 0.75rem;
   }
   
   .search-form input {
