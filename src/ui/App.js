@@ -95,6 +95,7 @@ function App() {
   return (
     <div className="app">
       <Background />
+      <FloatingIcons />
       <header className="app-header">
         <div className="header-content">
           <h1>AirReserve</h1>
