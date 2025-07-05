@@ -1,0 +1,21 @@
+{
+  "threshold": 200,
+  "check_interval": 60,
+  "notification_channels": ["console", "discord"],
+  "discord_webhook_url": "https://discord.com/api/webhooks/1390911558695125092/oJvItJYp9kH1DFIfTKURJGYu1jLmnpyf2pFTF4_ATQhCB5Kcl8MNellou2UGLr4IbgnQ",
+  "throttle_minutes": 30,
+  "real_time_data": {
+    "enabled": true,
+    "refresh_interval": 300,
+    "data_directory": "data",
+    "auto_refresh": true
+  },
+  "performance": {
+    "min_sleep_interval": 30,
+    "max_sleep_interval": 600,
+    "adaptive_sleep": true,
+    "memory_threshold": 80,
+    "memory_monitoring": true,
+    "cache_ttl": 300
+  }
+} 
