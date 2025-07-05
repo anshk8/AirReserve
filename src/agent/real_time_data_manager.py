@@ -82,16 +82,17 @@ class RealTimeDataManager:
         print(f"🔄 Refreshing flight data for {from_city} to {to_city}...")
         
         try:
-            # Use the existing Tavily price tracker
-            params = {
-                "FROM": from_city,
-                "TO": to_city,
-                "maxPrice": 1000  # High threshold to get all flights
-            }
-            
-            # Call the Tavily API (this is synchronous, so we run it in executor)
+            # Call the Tavily API with individual parameters (this is synchronous, so we run it in executor)
             loop = asyncio.get_event_loop()
-            result = await loop.run_in_executor(None, tavily_price_tracker, params)
+            result = await loop.run_in_executor(
+                None, 
+                tavily_price_tracker.invoke, 
+                {
+                    "from_city": from_city,
+                    "to_city": to_city,
+                    "max_price": "1000"  # High threshold to get all flights
+                }
+            )
             
             # Update last refresh time
             route_key = f"{from_city}_{to_city}"

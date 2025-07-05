@@ -14,7 +14,7 @@ from langchain_openai import ChatOpenAI
 from langchain.tools import tool
 from langchain.memory import ConversationBufferMemory
 from dotenv import load_dotenv
-from .tools.mathTools import add_numbers
+
 from .tools.travelTools import search_destinations
 from .tools.databaseTools import (
     save_flight_search, 
@@ -43,27 +43,6 @@ else:
     )
 
 
-#Can remove thus after just for testing
-@tool
-def get_weather(destination: str) -> str:
-    """Get weather information for a destination. If no destination is provided or destination is unclear, ask the user to specify."""
-    # Check if destination is provided and valid
-    if not destination or destination.strip().lower() in ['', 'unknown', 'none', 'null']:
-        return "I need to know which destination you'd like weather information for. Please specify a city or location."
-    
-    # Mock weather data (replace with real weather API)
-    weather_data = {
-        "paris": "Sunny, 22°C (72°F). Perfect weather for sightseeing!",
-        "tokyo": "Cloudy, 18°C (64°F). Light jacket recommended.", 
-        "bali": "Tropical, 28°C (82°F). Warm and humid with occasional showers.",
-        "new york": "Rainy, 15°C (59°F). Bring an umbrella!",
-        "barcelona": "Mild, 25°C (77°F). Beautiful Mediterranean weather.",
-        "thailand": "Hot and humid, 32°C (90°F). Stay hydrated!"
-    }
-    
-    result = weather_data.get(destination.lower(), f"Weather data not available for {destination}")
-    return f"Weather in {destination}: {result}"
-
 # Initialize LangChain agent with tools
 if llm:
 
@@ -72,9 +51,7 @@ if llm:
     
     #tools are imports from tools/ folder
     langchain_tools = [
-        add_numbers, 
-        search_destinations, 
-        get_weather,
+        search_destinations,
         save_flight_search,
         get_flight_searches
     ]
@@ -93,18 +70,7 @@ if llm:
 else:
     memory = None
 
-# MCP Tool Definitions
-@mcp.tool()
-def add_two_numbers(numbers: str) -> str:
-    """Add two integers together.
-    
-    Args:
-        numbers: Two numbers separated by comma (e.g., '3,5')
-    
-    Returns:
-        The sum as a string
-    """
-    return add_numbers(numbers)
+
 
 @mcp.tool()
 def find_destinations(query: str = "", budget: float = 2000.0) -> str:
@@ -119,18 +85,6 @@ def find_destinations(query: str = "", budget: float = 2000.0) -> str:
     """
     input_str = f"{query},{budget}" if query else str(budget)
     return search_destinations(input_str)
-
-@mcp.tool()
-def check_weather(destination: str) -> str:
-    """Get current weather information for a destination.
-    
-    Args:
-        destination: Name of the destination
-    
-    Returns:
-        Weather information for the destination
-    """
-    return get_weather(destination)
 
 @mcp.tool()
 def chat_with_travel_agent(message: str) -> str:
@@ -185,21 +139,6 @@ def plan_trip(destination: str, budget: float, duration: str = "1 week") -> str:
     except Exception as e:
         return f"Error planning trip: {str(e)}"
 
-
-# RESOURCES we will likely need TODO LATER
-@mcp.resource("travel://destinations")
-def get_destinations_data():
-    """Get the travel destinations database"""
-    return json.dumps({
-        "destinations": [
-            {"name": "Paris", "country": "France", "price": 1200, "rating": 4.5},
-            {"name": "Tokyo", "country": "Japan", "price": 1500, "rating": 4.7},
-            {"name": "Bali", "country": "Indonesia", "price": 800, "rating": 4.3},
-            {"name": "New York", "country": "USA", "price": 1000, "rating": 4.4},
-            {"name": "Barcelona", "country": "Spain", "price": 900, "rating": 4.2},
-            {"name": "Thailand", "country": "Thailand", "price": 700, "rating": 4.4}
-        ]
-    })
 
 # MCP Tool Definitions for Firebase operations
 @mcp.tool()
