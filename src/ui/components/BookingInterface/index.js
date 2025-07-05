@@ -155,6 +155,15 @@ const BookingInterface = ({ filters }) => {
         </div>
       )}
       
+      {/* Animated airplane icons */}
+      {!loading && !error && filteredFlights.length > 0 && (
+        <>
+          <div className="airplane-icon">✈</div>
+          <div className="airplane-icon">✈</div>
+          <div className="airplane-icon">✈</div>
+        </>
+      )}
+      
       <div className="flights-container">
         {filteredFlights.length > 0 ? (
           filteredFlights.map((flight) => (
