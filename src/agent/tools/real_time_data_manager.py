@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
 import threading
-from src.agent.tools.tavily_price_tracker import tavily_price_tracker
+from tavily_price_tracker import tavily_price_tracker
 
 class RealTimeDataManager:
     """Manages real-time flight data updates with concurrent access safety."""

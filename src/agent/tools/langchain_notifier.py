@@ -2,12 +2,17 @@ import json
 import asyncio
 import aiofiles
 import time
+import sys
 from pathlib import Path
 from datetime import datetime
-from src.agent.discord_notifier import DiscordNotifier
-from src.agent.notification_manager import NotificationManager
-from src.agent.real_time_data_manager import RealTimeDataManager
-from src.agent.performance_optimizer import PerformanceOptimizer
+
+# Add parent directory to path for imports
+sys.path.append(str(Path(__file__).parent.parent))
+
+from discord_notifier import DiscordNotifier
+from notification_manager import NotificationManager
+from real_time_data_manager import RealTimeDataManager
+from performance_optimizer import PerformanceOptimizer
 
 # Load notification config from JSON file
 CONFIG_FILE = Path("config/notification_config.json")

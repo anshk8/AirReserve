@@ -1,99 +1,43 @@
 import React, { useState, useEffect } from 'react';
+import flightDataService from '../../services/flightDataService.js';
 import './styles.css';
 
 const BookingInterface = ({ filters }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [bookingStatus, setBookingStatus] = useState(null);
+  const [flights, setFlights] = useState([]);
 
-  // Mock data - in a real app, this would come from an API
-  const mockFlights = [
-    {
-      id: 1,
-      airline: 'Delta Airlines',
-      flightNumber: 'DL123',
-      origin: 'JFK',
-      destination: 'LAX',
-      departureTime: '2025-07-10T08:00:00-04:00',
-      arrivalTime: '2025-07-10T11:30:00-07:00',
-      price: 299.99,
-      seatsAvailable: 24
-    },
-    {
-      id: 2,
-      airline: 'United Airlines',
-      flightNumber: 'UA456',
-      origin: 'JFK',
-      destination: 'SFO',
-      departureTime: '2025-07-10T09:15:00-04:00',
-      arrivalTime: '2025-07-10T13:30:00-07:00',
-      price: 349.99,
-      seatsAvailable: 12
-    },
-    {
-      id: 3,
-      airline: 'American Airlines',
-      flightNumber: 'AA789',
-      origin: 'JFK',
-      destination: 'ORD',
-      departureTime: '2025-07-10T07:30:00-04:00',
-      arrivalTime: '2025-07-10T09:45:00-05:00',
-      price: 199.99,
-      seatsAvailable: 8
-    },
-    {
-      id: 4,
-      airline: 'Southwest',
-      flightNumber: 'WN101',
-      origin: 'LAX',
-      destination: 'JFK',
-      departureTime: '2025-07-11T10:00:00-07:00',
-      arrivalTime: '2025-07-11T18:30:00-04:00',
-      price: 279.99,
-      seatsAvailable: 15
-    },
-    {
-      id: 5,
-      airline: 'JetBlue',
-      flightNumber: 'B6202',
-      origin: 'BOS',
-      destination: 'SFO',
-      departureTime: '2025-07-12T06:45:00-04:00',
-      arrivalTime: '2025-07-12T10:30:00-07:00',
-      price: 329.99,
-      seatsAvailable: 5
-    },
-    {
-      id: 6,
-      airline: 'Alaska Airlines',
-      flightNumber: 'AS345',
-      origin: 'SEA',
-      destination: 'LAX',
-      departureTime: '2025-07-13T14:20:00-07:00',
-      arrivalTime: '2025-07-13T16:45:00-07:00',
-      price: 159.99,
-      seatsAvailable: 22
-    }
-  ];
+  // Fetch flights from API
+  useEffect(() => {
+    const fetchFlights = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        let flightData;
+        if (filters && (filters.from || filters.to || filters.maxPrice)) {
+          // Apply filters when user has provided search criteria
+          flightData = await flightDataService.searchFlights(filters);
+        } else {
+          // Show all flights initially
+          flightData = await flightDataService.getAllFlights();
+        }
+        
+        setFlights(flightData);
+      } catch (err) {
+        console.error('Error fetching flights:', err);
+        setError('Failed to load flight data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Apply filters to mock flights
-  const filteredFlights = filters ? mockFlights.filter(flight => {
-    let matches = true;
-    
-    if (filters.from) {
-      matches = matches && flight.origin.toLowerCase().includes(filters.from.toLowerCase());
-    }
-    
-    if (filters.to) {
-      matches = matches && flight.destination.toLowerCase().includes(filters.to.toLowerCase());
-    }
-    
-    if (filters.maxPrice) {
-      matches = matches && flight.price <= filters.maxPrice;
-    }
-    
-    return matches;
-  }) : mockFlights;
+    fetchFlights();
+  }, [filters]);
+
+  // Apply filters to flights
+  const filteredFlights = flights;
 
 
   const handleBookNow = (flightId) => {
@@ -147,7 +91,7 @@ const BookingInterface = ({ filters }) => {
 
   return (
     <div className="booking-interface">
-      <h2>Available Flights {filters && `(${filteredFlights.length})`}</h2>
+      <h2>Available Flights {filters && (filters.from || filters.to || filters.maxPrice) && `(${filteredFlights.length})`}</h2>
       
       {bookingStatus && (
         <div className={`booking-status ${bookingStatus.type}`}>
@@ -231,7 +175,12 @@ const BookingInterface = ({ filters }) => {
             {filters && (
               <button 
                 className="clear-filters"
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  // Clear filters by calling the parent component's filter reset
+                  if (typeof filters.onClear === 'function') {
+                    filters.onClear();
+                  }
+                }}
               >
                 Clear Filters
               </button>
