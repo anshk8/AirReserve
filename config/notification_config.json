@@ -3,7 +3,7 @@
   "check_interval": 60,
   "notification_channels": ["console", "discord"],
   "discord_webhook_url": "https://discord.com/api/webhooks/1391102467189637221/tql23WreNHxNlQ4Aaz-N3ELvWYLw4-R_S4bKHvZqmjykSxW53VKhQKjiT6K1p-44SLQr",
-  "throttle_minutes": 30,
+  "throttle_minutes": 1,
   "real_time_data": {
     "enabled": true,
     "refresh_interval": 300,

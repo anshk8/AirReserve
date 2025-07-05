@@ -5,10 +5,16 @@ This module integrates the async price monitoring with LangChain's agent framewo
 """
 
 import asyncio
+import sys
+from pathlib import Path
 from langchain.agents import AgentExecutor, create_openai_functions_agent
 from langchain.schema import SystemMessage
 from langchain_openai import ChatOpenAI
 from langchain.tools import tool
+
+# Add current directory to path for imports
+sys.path.append(str(Path(__file__).parent))
+
 from langchain_notifier import monitor_prices, load_prices, send_notification
 
 class PriceMonitoringAgent:
