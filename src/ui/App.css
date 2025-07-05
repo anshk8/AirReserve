@@ -44,26 +44,28 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1;
+  z-index: -2;
   overflow: hidden;
-}
-
-.gradient-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(-45deg, #1B2735, #203354, #2A3F5F, #4A6FA5);
+  background: linear-gradient(-45deg, #0a1924, #1a2a3a, #2a3f5f, #4a6fa5);
   background-size: 400% 400%;
   animation: gradientBG 15s ease infinite;
-  opacity: 0.8;
 }
 
 @keyframes gradientBG {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+}
+
+/* Gradient overlay for better text readability */
+.gradient-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(10, 25, 47, 0.9) 0%, rgba(10, 25, 47, 0.7) 100%);
+  z-index: -1;
 }
 
 @keyframes gradientBG {
@@ -606,3 +608,4 @@ main {
     width: 100%;
   }
 }
+

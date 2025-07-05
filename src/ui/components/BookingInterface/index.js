@@ -155,6 +155,15 @@ const BookingInterface = ({ filters }) => {
         </div>
       )}
       
+      {/* Animated airplane icons */}
+      {!loading && !error && filteredFlights.length > 0 && (
+        <>
+          <div className="airplane-icon">✈</div>
+          <div className="airplane-icon">✈</div>
+          <div className="airplane-icon">✈</div>
+        </>
+      )}
+      
       <div className="flights-container">
         {filteredFlights.length > 0 ? (
           filteredFlights.map((flight) => (
@@ -188,15 +197,15 @@ const BookingInterface = ({ filters }) => {
                 
                 <div className="flight-info">
                   <div className="info-item">
-                    <span className="label">Date:</span>
+                    <span className="label">Date: </span>
                     <span>{formatDate(flight.departureTime)}</span>
                   </div>
                   <div className="info-item">
-                    <span className="label">Duration:</span>
+                    <span className="label">Duration: </span>
                     <span>{calculateDuration(flight.departureTime, flight.arrivalTime)}</span>
                   </div>
                   <div className="info-item">
-                    <span className="label">Seats:</span>
+                    <span className="label">Seats: </span>
                     <span className={`seats-${flight.seatsAvailable > 5 ? 'high' : 'low'}`}>
                       {flight.seatsAvailable} {flight.seatsAvailable === 1 ? 'seat' : 'seats'} left
                     </span>
