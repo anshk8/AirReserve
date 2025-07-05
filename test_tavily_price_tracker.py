@@ -47,8 +47,13 @@ def test_flight_price_tracker():
         print("-" * 40)
         
         try:
-            # Call the tool function
-            result = tavily_price_tracker(test_case['params'])
+            # Call the tool function with individual parameters using invoke
+            params = test_case['params']
+            result = tavily_price_tracker.invoke({
+                "from_city": params["FROM"],
+                "to_city": params["TO"], 
+                "max_price": str(params["maxPrice"])
+            })
             
             # Store result
             test_result = {
@@ -130,7 +135,7 @@ def test_error_handling():
         {
             "name": "Invalid maxPrice",
             "params": {"FROM": "Toronto", "TO": "Ottawa", "maxPrice": "invalid"},
-            "expected_error": "maxPrice must be a valid integer"
+            "expected_error": "max_price must be a valid integer"
         },
         {
             "name": "Empty Parameters",
@@ -144,7 +149,12 @@ def test_error_handling():
         print(f"   Parameters: {test_case['params']}")
         
         try:
-            result = tavily_price_tracker(test_case['params'])
+            params = test_case['params']
+            result = tavily_price_tracker.invoke({
+                "from_city": params.get("FROM", ""),
+                "to_city": params.get("TO", ""),
+                "max_price": str(params.get("maxPrice", ""))
+            })
             expected_error = test_case['expected_error']
             
             if expected_error in result:

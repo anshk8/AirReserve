@@ -2,6 +2,10 @@ import os
 import requests
 import json
 import re
+import os
+import requests
+import json
+import re
 from datetime import datetime
 from langchain.tools import tool
 from dotenv import load_dotenv
@@ -125,34 +129,28 @@ def save_flight_data(flights: list, from_city: str, to_city: str) -> str:
         return f"Error saving flight data: {str(e)}"
 
 @tool
-def tavily_price_tracker(params: dict) -> str:
+def tavily_price_tracker(from_city: str, to_city: str, max_price: str) -> str:
     """
     Fetch flight prices using Tavily API
     
     Args:
-        params (dict): Dictionary containing flight search parameters
-            - TO (str): Destination city
-            - FROM (str): Origin city  
-            - maxPrice (int): Maximum price threshold
+        from_city (str): Origin city
+        to_city (str): Destination city  
+        max_price (str): Maximum price threshold
     
     Returns:
         str: Formatted flight price information or error message
     """
     try:
-        # Extract parameters with default
-        to_city = params.get("TO", "")
-        from_city = params.get("FROM", "")
-        max_price = params.get("maxPrice", "")
-        
         # Validate required parameters
         if not all([to_city, from_city, max_price]):
-            return "Error: Missing required parameters. Please provide TO, FROM, and maxPrice."
+            return "Error: Missing required parameters. Please provide from_city, to_city, and max_price."
         
         # Validate max_price is a number
         try:
             max_price = int(max_price)
         except (ValueError, TypeError):
-            return "Error: maxPrice must be a valid integer."
+            return "Error: max_price must be a valid integer."
         
         # Get API key from environment
         api_key = os.getenv("TAVILY_API_KEY")
