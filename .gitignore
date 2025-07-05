@@ -47,6 +47,9 @@ Thumbs.db
 /docs/media/*
 !.gitkeep
 
+# Configuration files with sensitive data
+config/notification_config.json
+
 # Firebase
 firebase-debug.log
 .firebase/
