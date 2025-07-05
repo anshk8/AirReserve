@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import flightDataService from '../../services/flightDataService';
+import flightDataService from '../../services/flightDataService.js';
 import './styles.css';
 
 const BookingInterface = ({ filters }) => {
