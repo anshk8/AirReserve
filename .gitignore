@@ -44,6 +44,7 @@ Thumbs.db
 
 # Project specific
 /data/*.json
+/data/alerts/*.json
 /docs/media/*
 !.gitkeep
 

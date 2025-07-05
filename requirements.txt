@@ -12,6 +12,7 @@ uvicorn>=0.24.0
 langchain>=0.1.0
 langchain-openai>=0.0.5
 langchain-community>=0.0.10
+langchain-core>=0.1.0
 
 # LangGraph for Agent Workflow
 langgraph>=0.1.0
