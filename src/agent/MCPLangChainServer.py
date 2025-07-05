@@ -16,6 +16,10 @@ from langchain.memory import ConversationBufferMemory
 from dotenv import load_dotenv
 from .tools.mathTools import add_numbers
 from .tools.travelTools import search_destinations
+from .tools.databaseTools import (
+    save_flight_search, 
+    get_flight_searches
+)
 from .SYSTEMPROMPT import system_prompt
 
 # Load environment variables
@@ -67,7 +71,13 @@ if llm:
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     
     #tools are imports from tools/ folder
-    langchain_tools = [add_numbers, search_destinations, get_weather]
+    langchain_tools = [
+        add_numbers, 
+        search_destinations, 
+        get_weather,
+        save_flight_search,
+        get_flight_searches
+    ]
 
     
 
@@ -190,6 +200,35 @@ def get_destinations_data():
             {"name": "Thailand", "country": "Thailand", "price": 700, "rating": 4.4}
         ]
     })
+
+# MCP Tool Definitions for Firebase operations
+@mcp.tool()
+def store_flight_search(to_destination: str, from_origin: str, max_price: int, user_id: str = "default") -> str:
+    """Store flight search parameters in Firebase database.
+    
+    Args:
+        to_destination: Destination airport code or city name
+        from_origin: Origin airport code or city name  
+        max_price: Maximum price budget for the flight
+        user_id: User identifier (optional, defaults to 'default')
+    
+    Returns:
+        Success message with document ID or error message
+    """
+    return save_flight_search(to_destination, from_origin, max_price, user_id)
+
+@mcp.tool()
+def retrieve_flight_searches(user_id: str = "default", limit: int = 10) -> str:
+    """Retrieve recent flight searches from Firebase database.
+    
+    Args:
+        user_id: User identifier to filter searches
+        limit: Maximum number of searches to return
+    
+    Returns:
+        JSON string of flight searches or error message
+    """
+    return get_flight_searches(user_id, limit)
 
 if __name__ == "__main__":
     # Run the server
