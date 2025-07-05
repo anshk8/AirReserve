@@ -31,6 +31,24 @@ function App() {
       ...prev,
       [name]: value
     }));
+    
+    // Apply real-time filtering as user types
+    const newSearchParams = {
+      ...searchParams,
+      [name]: value
+    };
+    
+    // Only apply filters if at least one field has a value
+    if (newSearchParams.from || newSearchParams.to || newSearchParams.maxPrice) {
+      setFilters({
+        from: newSearchParams.from.toUpperCase(),
+        to: newSearchParams.to.toUpperCase(),
+        maxPrice: newSearchParams.maxPrice ? parseFloat(newSearchParams.maxPrice) : null
+      });
+    } else {
+      // Clear filters if all fields are empty
+      setFilters(null);
+    }
   };
 
   const handleSearch = async (e) => {
