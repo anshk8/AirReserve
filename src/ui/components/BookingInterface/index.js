@@ -3,7 +3,7 @@ import flightDataService from '../../services/flightDataService.js';
 import './styles.css';
 
 const BookingInterface = ({ filters }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [bookingStatus, setBookingStatus] = useState(null);
   const [flights, setFlights] = useState([]);
@@ -17,9 +17,11 @@ const BookingInterface = ({ filters }) => {
         
         let flightData;
         if (filters && (filters.from || filters.to || filters.maxPrice)) {
+          // Only fetch flights when user has provided search criteria
           flightData = await flightDataService.searchFlights(filters);
         } else {
-          flightData = await flightDataService.getAllFlights();
+          // Don't show any flights initially - wait for user to search
+          flightData = [];
         }
         
         setFlights(flightData);
@@ -89,7 +91,12 @@ const BookingInterface = ({ filters }) => {
 
   return (
     <div className="booking-interface">
-      <h2>Available Flights {filters && `(${filteredFlights.length})`}</h2>
+      <h2>
+        {filters && (filters.from || filters.to || filters.maxPrice) 
+          ? `Available Flights (${filteredFlights.length})` 
+          : 'Search for Flights'
+        }
+      </h2>
       
       {bookingStatus && (
         <div className={`booking-status ${bookingStatus.type}`}>
@@ -107,7 +114,19 @@ const BookingInterface = ({ filters }) => {
       )}
       
       <div className="flights-container">
-        {filteredFlights.length > 0 ? (
+        {!filters || (!filters.from && !filters.to && !filters.maxPrice) ? (
+          <div className="no-flights">
+            <p>👋 Welcome to AirReserve!</p>
+            <p>Use the search form above to find available flights.</p>
+            <p>We have data for routes like:</p>
+            <ul style={{ textAlign: 'left', maxWidth: '300px', margin: '0 auto' }}>
+              <li>Vancouver to Toronto</li>
+              <li>Toronto to Ottawa</li>
+              <li>Calgary to Edmonton</li>
+              <li>Ottawa to Montreal</li>
+            </ul>
+          </div>
+        ) : filteredFlights.length > 0 ? (
           filteredFlights.map((flight) => (
             <div key={flight.id} className="flight-card">
               <div className="flight-header">
