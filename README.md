@@ -65,3 +65,6 @@ uvicorn src.main:app --reload
 - Never commit `.env` file to version control
 - Keep API keys secure
 - Follow best practices for credential management
+
+**Notification Config Updates:**  
+If you see a new version or changes in `config/notification_config.template.json`, update your own `notification_config.json` to match, and re-add your webhook and any personal settings. The `config_version` field helps you track if your config is up to date.
