@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Flight booking interface for AirReserve",
   "main": "src/ui/index.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "webpack serve --mode development --open",
-    "build": "webpack --mode production",
+    "dev": "webpack serve --mode development --config webpack.config.cjs --open",
+    "build": "webpack --mode production --config webpack.config.cjs",
     "test": "jest",
     "setup": "node scripts/setup.js"
   },
@@ -14,6 +15,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "firebase": "^11.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-globe.gl": "^2.34.0",

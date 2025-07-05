@@ -387,6 +387,59 @@ code {
   box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
 }
 
+.search-button:disabled {
+  background: linear-gradient(135deg, #666, #555);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.search-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+  letter-spacing: 1.5px;
+}
+
+.search-button:disabled:hover::after {
+  right: 1.5rem;
+  opacity: 0;
+}
+
+/* Message styles */
+.message {
+  grid-column: 1 / -1;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  animation: slideIn 0.3s ease-out;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.message.success {
+  background: rgba(46, 204, 113, 0.15);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  color: #2ecc71;
+}
+
+.message.error {
+  background: rgba(231, 76, 60, 0.15);
+  border: 1px solid rgba(231, 76, 60, 0.3);
+  color: #e74c3c;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Footer styles */
 .app-footer {
   background: #2c3e50;

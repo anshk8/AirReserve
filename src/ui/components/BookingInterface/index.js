@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './styles.css';
 
 const BookingInterface = ({ filters }) => {
-  const [flights, setFlights] = useState([]);
-  const [filteredFlights, setFilteredFlights] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [bookingStatus, setBookingStatus] = useState(null);
 
@@ -78,51 +76,25 @@ const BookingInterface = ({ filters }) => {
     }
   ];
 
-  // Fetch flights (in a real app, this would be an API call)
-  useEffect(() => {
-    const fetchFlights = async () => {
-      try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setFlights(mockFlights);
-        setFilteredFlights(mockFlights);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to load flights. Please try again later.');
-        setLoading(false);
-        console.error('Error fetching flights:', err);
-      }
-    };
-
-    fetchFlights();
-  }, []);
-
-  // Apply filters when they change
-  useEffect(() => {
-    if (!filters) return;
-    
-    let result = [...flights];
+  // Apply filters to mock flights
+  const filteredFlights = filters ? mockFlights.filter(flight => {
+    let matches = true;
     
     if (filters.from) {
-      result = result.filter(flight => 
-        flight.origin.toLowerCase().includes(filters.from.toLowerCase())
-      );
+      matches = matches && flight.origin.toLowerCase().includes(filters.from.toLowerCase());
     }
     
     if (filters.to) {
-      result = result.filter(flight => 
-        flight.destination.toLowerCase().includes(filters.to.toLowerCase())
-      );
+      matches = matches && flight.destination.toLowerCase().includes(filters.to.toLowerCase());
     }
     
     if (filters.maxPrice) {
-      result = result.filter(flight => 
-        flight.price <= filters.maxPrice
-      );
+      matches = matches && flight.price <= filters.maxPrice;
     }
     
-    setFilteredFlights(result);
-  }, [filters, flights]);
+    return matches;
+  }) : mockFlights;
+
 
   const handleBookNow = (flightId) => {
     // In a real app, this would make an API call to book the flight

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import BookingInterface from './components/BookingInterface';
+import BookingInterface from './components/BookingInterface/index.js';
+import configDatabase from './services/firebaseService.js';
+import { getDatabase, ref, push, set, remove } from 'firebase/database';
 import './App.css';
 
 // Background component
@@ -17,7 +19,11 @@ function App() {
     to: '',
     maxPrice: ''
   });
+
   const [filters, setFilters] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState(null);
+  const [messageSent, setMessageSent] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -27,14 +33,64 @@ function App() {
     }));
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    setFilters({
-      from: searchParams.from.toUpperCase(),
-      to: searchParams.to.toUpperCase(),
-      maxPrice: searchParams.maxPrice ? parseFloat(searchParams.maxPrice) : null
-    });
+    setIsLoading(true);
+    setMessage(null);
+
+    try {
+      // Initialize Firebase database
+      const database = getDatabase(configDatabase);
+      const referenceDatabase = ref(database, "flight_searches");
+
+      // Clear the entire flight_searches database first
+      await remove(referenceDatabase);
+      console.log('Previous search data cleared from Firebase');
+
+      // Push the new search data to Firebase
+      const pushMessageRef = push(referenceDatabase);
+      await set(pushMessageRef, {
+        FROM: searchParams.from,
+        TO: searchParams.to,
+        MAX_PRICE: searchParams.maxPrice || null,
+        TIMESTAMP: new Date().toISOString(),
+        SEARCH_ID: pushMessageRef.key
+      });
+
+      console.log('New search data saved to Firebase successfully');
+      
+      setMessage({ type: 'success', text: `Searching flights from ${searchParams.from} to ${searchParams.to}` });
+      
+      // Apply filters for flight search
+      setFilters({
+        from: searchParams.from.toUpperCase(),
+        to: searchParams.to.toUpperCase(),
+        maxPrice: searchParams.maxPrice ? parseFloat(searchParams.maxPrice) : null
+      });
+
+      // Clear the form fields after successful submission
+      setSearchParams({
+        from: '',
+        to: '',
+        maxPrice: ''
+      });
+
+    } catch (error) {
+      console.error('Error saving to Firebase:', error);
+      setMessage({ type: 'error', text: `Error: ${error.message}` });
+    } finally {
+      setIsLoading(false);
+      
+      // Clear message after 5 seconds
+      setTimeout(() => {
+        setMessage(null);
+      }, 5000);
+    }
   };
+
+
+
+
 
   return (
     <div className="app">
@@ -50,6 +106,12 @@ function App() {
         </div>
         
         <form onSubmit={handleSearch} className="search-form">
+          {message && (
+            <div className={`message ${message.type}`}>
+              {message.text}
+            </div>
+          )}
+          
           <div className="form-group">
             <label htmlFor="from">From:</label>
             <input
@@ -60,6 +122,7 @@ function App() {
               onChange={handleInputChange}
               placeholder="City or Airport Code"
               required
+              disabled={isLoading}
             />
           </div>
           
@@ -73,6 +136,7 @@ function App() {
               onChange={handleInputChange}
               placeholder="City or Airport Code"
               required
+              disabled={isLoading}
             />
           </div>
           
@@ -87,11 +151,12 @@ function App() {
               placeholder="Maximum price"
               min="0"
               step="0.01"
+              disabled={isLoading}
             />
           </div>
           
-          <button type="submit" className="search-button">
-            Search Flights
+          <button type="submit" className="search-button" disabled={isLoading}>
+            {isLoading ? 'Saving & Searching...' : 'Search Flights'}
           </button>
         </form>
       </header>
