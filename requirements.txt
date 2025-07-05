@@ -13,6 +13,9 @@ langchain>=0.1.0
 langchain-openai>=0.0.5
 langchain-community>=0.0.10
 
+# Model Context Protocol (MCP)
+mcp>=1.0.0
+
 # Firebase integration
 firebase-admin>=6.0.0
 python-dotenv>=1.0.0
@@ -27,6 +30,3 @@ pytest>=7.0.0
 # Data processing
 pandas>=2.0.0
 json5>=0.9.0
-
-# Discord notifications
-discord.py>=2.0.0
