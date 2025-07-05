@@ -116,6 +116,16 @@ function App() {
     }, 3000);
   };
 
+  const scrollToFlights = () => {
+    const flightsSection = document.getElementById('available-flights');
+    if (flightsSection) {
+      flightsSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
 
 
 
@@ -127,7 +137,7 @@ function App() {
         <div className="header-content">
           <h1>AirReserve</h1>
           <p className="subtitle">Your next journey starts here</p>
-          <div className="scroll-indicator">
+          <div className="scroll-indicator" onClick={scrollToFlights} style={{ cursor: 'pointer' }}>
             <span>Scroll to explore</span>
             <div className="arrow"></div>
           </div>
@@ -189,7 +199,7 @@ function App() {
         </form>
       </header>
       
-      <main>
+      <main id="available-flights">
         <BookingInterface filters={{ ...filters, onClear: clearFilters }} />
       </main>
       
