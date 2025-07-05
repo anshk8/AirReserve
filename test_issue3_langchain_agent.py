@@ -8,6 +8,7 @@ import sys
 import os
 import asyncio
 import json
+import requests
 import time
 from datetime import datetime
 
@@ -39,9 +40,61 @@ class NotificationTester:
                     "threshold": threshold
                 }
                 self.notifications_sent.append(notification)
+
+                # Send Discord notification
+                await self.send_discord_notification(flight)
+                
                 print(f"🚨 PRICE DROP ALERT: ${flight.get('price')} for {flight.get('airline', 'Unknown')}")
         
         print(f"📊 Current stats: {self.price_drops_detected} price drops detected")
+
+    async def send_discord_notification(self, flight):
+        """Send notification to Discord webhook"""
+        try:
+            # Load Discord webhook URL from config
+            config_path = "config/notification_config.json"
+            if os.path.exists(config_path):
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                
+                webhook_url = config.get('discord_webhook_url', '')
+                if not webhook_url or webhook_url == 'your_discord_webhook_url_here':
+                    print("⚠️  Discord webhook not configured")
+                    return
+                
+                # Create Discord message
+                embed = {
+                    "title": "🚨 Flight Price Drop Alert!",
+                    "description": f"**Price Drop Detected!**\n\n"
+                                 f"💰 **Price:** ${flight.get('price', 'Unknown')}\n"
+                                 f"✈️ **Airline:** {flight.get('airline', 'Unknown')}\n"
+                                 f"🛫 **Route:** {flight.get('departure', 'Unknown')} → {flight.get('destination', 'Unknown')}\n"
+                                 f"⏰ **Detected:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                    "color": 0xFF0000,  # Red color
+                    "footer": {
+                        "text": "AirReserve Price Monitor"
+                    },
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+                payload = {
+                    "embeds": [embed],
+                    "content": "🔔 **PRICE DROP ALERT!** Check out this great deal!"
+                }
+                
+                # Send to Discord
+                response = requests.post(webhook_url, json=payload, timeout=10)
+                
+                if response.status_code == 204:
+                    print(f"✅ Discord notification sent successfully!")
+                else:
+                    print(f"❌ Discord notification failed: {response.status_code} - {response.text}")
+                    
+            else:
+                print("❌ Notification config file not found")
+                
+        except Exception as e:
+            print(f"❌ Error sending Discord notification: {e}")
 
 async def test_real_time_data_manager():
     """Test the RealTimeDataManager functionality"""
