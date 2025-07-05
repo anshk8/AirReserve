@@ -39,7 +39,7 @@ This directory contains setup and verification tools for the Summer Vibe Hackath
 
 ## Expected Output
 
-### ✅ Successful Setup:
+### ✅ Successful Setup:`
 ```
 🚀 Summer Vibe Hackathon - Setup Verification
 ==================================================
