@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import BookingInterface from './components/BookingInterface';
+import FloatingIcons from './components/FloatingIcons';
 import './App.css';
 
 // Background component
@@ -39,6 +40,7 @@ function App() {
   return (
     <div className="app">
       <Background />
+      <FloatingIcons />
       <header className="app-header">
         <div className="header-content">
           <h1>AirReserve</h1>
