@@ -13,6 +13,10 @@ langchain>=0.1.0
 langchain-openai>=0.0.5
 langchain-community>=0.0.10
 
+# LangGraph for Agent Workflow
+langgraph>=0.1.0
+langsmith>=0.1.0
+
 # Model Context Protocol (MCP)
 mcp>=1.0.0
 
