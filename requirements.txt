@@ -1,0 +1,32 @@
+# Python dependencies for the summer-vibe-hackathon project
+
+# API and HTTP requests
+requests>=2.31.0
+tavily-python>=0.3.0
+
+# Web framework and server
+fastapi>=0.104.0
+uvicorn>=0.24.0
+
+# LangChain for AI agent functionality
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-community>=0.0.10
+
+# Firebase integration
+firebase-admin>=6.0.0
+python-dotenv>=1.0.0
+
+# Audio processing (for Superwhisper integration)
+pyaudio>=0.2.11
+SpeechRecognition>=3.10.0
+
+# Development and testing
+pytest>=7.0.0
+
+# Data processing
+pandas>=2.0.0
+json5>=0.9.0
+
+# Discord notifications
+discord.py>=2.0.0
