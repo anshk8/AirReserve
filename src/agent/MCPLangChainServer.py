@@ -20,6 +20,12 @@ from .tools.databaseTools import (
     save_flight_search, 
     get_flight_searches
 )
+from .tools.tavily_price_tracker import tavily_price_tracker
+from .firebase_listener import (
+    start_firebase_listener, 
+    stop_firebase_listener, 
+    get_firebase_listener
+)
 from .SYSTEMPROMPT import system_prompt
 
 # Load environment variables
@@ -53,7 +59,8 @@ if llm:
     langchain_tools = [
         search_destinations,
         save_flight_search,
-        get_flight_searches
+        get_flight_searches,
+        tavily_price_tracker
     ]
 
     
@@ -168,6 +175,89 @@ def retrieve_flight_searches(user_id: str = "default", limit: int = 10) -> str:
         JSON string of flight searches or error message
     """
     return get_flight_searches(user_id, limit)
+
+@mcp.tool()
+def start_monitoring_firebase(poll_interval: int = 5) -> str:
+    """Start monitoring Firebase for new flight search entries.
+    
+    Args:
+        poll_interval: Seconds between checking Firebase for new entries (default: 5)
+    
+    Returns:
+        Status message about the monitoring service
+    """
+    try:
+        listener = start_firebase_listener(poll_interval)
+        return f"✅ Firebase monitoring started! Checking for new flight searches every {poll_interval} seconds. When new entries are detected, Tavily API will be called automatically."
+    except Exception as e:
+        return f"❌ Error starting Firebase monitoring: {str(e)}"
+
+@mcp.tool()
+def stop_monitoring_firebase() -> str:
+    """Stop monitoring Firebase for new flight search entries.
+    
+    Returns:
+        Status message about stopping the monitoring service
+    """
+    try:
+        stop_firebase_listener()
+        return "✅ Firebase monitoring stopped successfully."
+    except Exception as e:
+        return f"❌ Error stopping Firebase monitoring: {str(e)}"
+
+@mcp.tool()
+def get_monitoring_status() -> str:
+    """Get the current status of Firebase monitoring.
+    
+    Returns:
+        JSON string with monitoring status information
+    """
+    try:
+        listener = get_firebase_listener()
+        if listener:
+            status = listener.get_status()
+            return json.dumps(status, indent=2)
+        else:
+            return json.dumps({"is_running": False, "message": "No listener initialized"}, indent=2)
+    except Exception as e:
+        return f"❌ Error getting monitoring status: {str(e)}"
+
+@mcp.tool()
+def search_flight_prices(from_city: str, to_city: str, max_price: str) -> str:
+    """Search for flight prices using Tavily API.
+    
+    Args:
+        from_city: Origin city name
+        to_city: Destination city name
+        max_price: Maximum price threshold as string
+    
+    Returns:
+        Flight price information from Tavily API
+    """
+    return tavily_price_tracker(from_city, to_city, max_price)
+    
+@mcp.listener()
+def firebase_listener() -> None:
+    """Start the Firebase listener for real-time updates."""
+    start_firebase_listener()
+
+@mcp.action()
+def on_flight_search_saved(data: dict) -> None:
+    """Action to perform when a flight search is saved.
+    
+    Args:
+        data: The data payload from Firebase
+    """
+    print("Flight search saved:", data)
+
+@mcp.action()
+def on_flight_search_deleted(data: dict) -> None:
+    """Action to perform when a flight search is deleted.
+    
+    Args:
+        data: The data payload from Firebase
+    """
+    print("Flight search deleted:", data)
 
 if __name__ == "__main__":
     # Run the server
