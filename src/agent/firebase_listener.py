@@ -13,19 +13,19 @@ from typing import Dict, Any, Optional
 from dotenv import load_dotenv
 
 # Import tools for processing
-from .tools.tavily_price_tracker import tavily_price_tracker
 from .tools.databaseTools import _get_flight_searches_impl
 
 # Load environment variables
 load_dotenv()
 
 class FirebaseListener:
-    def __init__(self):
+    def __init__(self, agent=None):
         self.database_url = os.environ.get("FIREBASE_DATABASE_URL")
         self.last_processed_timestamp = None
         self.is_running = False
         self.listener_thread = None
         self.processed_records = set()  # Track processed record IDs
+        self.agent = agent  # LangChain agent instance
         
         if not self.database_url or self.database_url == "https://your-project-default-rtdb.firebaseio.com/":
             raise ValueError("Firebase Database URL not configured. Please update FIREBASE_DATABASE_URL in your .env file.")
@@ -125,11 +125,19 @@ class FirebaseListener:
         """
         try:
             record_id = entry.get("record_id", "unknown")
-            to_destination = entry.get("to", "")
-            from_origin = entry.get("from", "")
-            max_price = entry.get("maxPrice", 0)
-            user_id = entry.get("userId", "default")
-            timestamp = entry.get("timestamp", "")
+            # Handle different field name formats
+            to_destination = entry.get("TO", entry.get("to", ""))
+            from_origin = entry.get("FROM", entry.get("from", ""))
+            max_price_raw = entry.get("MAX_PRICE", entry.get("maxPrice", 0))
+            user_id = entry.get("USER_ID", entry.get("userId", "default"))
+            timestamp = entry.get("TIMESTAMP", entry.get("timestamp", ""))
+            
+            # Convert max_price to integer if it's a string
+            try:
+                max_price = int(max_price_raw) if max_price_raw else 0
+            except (ValueError, TypeError):
+                print(f"⚠️ Invalid max_price format: {max_price_raw}, defaulting to 0")
+                max_price = 0
             
             print(f"\n🎯 Processing flight search {record_id}")
             print(f"   📍 Route: {from_origin} → {to_destination}")
@@ -142,55 +150,33 @@ class FirebaseListener:
                 print(f"❌ Missing required fields in record {record_id}")
                 return
             
-            # Call Tavily API through the price tracker tool
-            print(f"🔍 Calling Tavily API for flight prices...")
+            # Call LangChain agent with natural language prompt
+            print(f"🤖 Calling LangChain agent for flight search...")
             
-            result = tavily_price_tracker.invoke({
-                "from_city": from_origin,
-                "to_city": to_destination,
-                "max_price": str(max_price)
-            })
+            if not self.agent:
+                result = "❌ No LangChain agent provided to Firebase listener. Cannot process flight search."
+                print(result)
+            else:
+                # Create natural language prompt for the agent
+                prompt = f"Get me flights from {from_origin} to {to_destination} under ${max_price}"
+                print(f"   Agent prompt: '{prompt}'")
+                
+                try:
+                    # Use the LangChain agent (which has Tavily tools)
+                    response = self.agent.invoke({"input": prompt})
+                    result = response.get("output", "No response from agent")
+                    print(f"✅ Agent response received")
+                except Exception as e:
+                    result = f"❌ Error from LangChain agent: {str(e)}"
+                    print(result)
             
-            print(f"📋 Tavily API Result:")
+            print(f"📋 Agent Result:")
             print(f"   {result}")
             
-            # You could also save results back to Firebase or trigger notifications here
-            self._save_processing_result(record_id, result, entry)
+            # Results are only logged to console, not saved to Firebase
             
         except Exception as e:
             print(f"❌ Error processing flight search {entry.get('record_id', 'unknown')}: {str(e)}")
-    
-    def _save_processing_result(self, record_id: str, tavily_result: str, original_entry: Dict[str, Any]):
-        """
-        Save the processing result back to Firebase or log it
-        
-        Args:
-            record_id: Firebase record ID
-            tavily_result: Result from Tavily API call
-            original_entry: Original flight search entry
-        """
-        try:
-            # Create processing result record
-            processing_data = {
-                "original_search_id": record_id,
-                "tavily_result": tavily_result,
-                "processed_at": datetime.now().isoformat(),
-                "original_search": original_entry
-            }
-            
-            # Save to Firebase under a different node
-            url = f"{self.database_url.rstrip('/')}/processed_searches.json"
-            response = requests.post(url, json=processing_data, timeout=10)
-            
-            if response.status_code == 200:
-                result = response.json()
-                processing_record_id = result.get("name", "unknown")
-                print(f"✅ Processing result saved with ID: {processing_record_id}")
-            else:
-                print(f"⚠️ Could not save processing result: {response.status_code}")
-                
-        except Exception as e:
-            print(f"⚠️ Error saving processing result: {str(e)}")
     
     def get_status(self) -> Dict[str, Any]:
         """Get current listener status"""
@@ -205,11 +191,12 @@ class FirebaseListener:
 # Global listener instance
 _firebase_listener = None
 
-def start_firebase_listener(poll_interval: int = 5) -> FirebaseListener:
+def start_firebase_listener(agent=None, poll_interval: int = 5) -> FirebaseListener:
     """
     Start the global Firebase listener
     
     Args:
+        agent: LangChain agent instance with Tavily tools
         poll_interval: Seconds between polling Firebase (default: 5)
     
     Returns:
@@ -218,7 +205,7 @@ def start_firebase_listener(poll_interval: int = 5) -> FirebaseListener:
     global _firebase_listener
     
     if _firebase_listener is None:
-        _firebase_listener = FirebaseListener()
+        _firebase_listener = FirebaseListener(agent=agent)
     
     _firebase_listener.start_listening(poll_interval)
     return _firebase_listener

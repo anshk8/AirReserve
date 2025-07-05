@@ -16,6 +16,7 @@ sys.path.insert(0, str(current_dir))
 try:
     from src.agent.firebase_listener import start_firebase_listener, stop_firebase_listener
     from src.agent.tools.databaseTools import _save_flight_search_impl
+    from src.agent.MCPLangChainServer import agent
     print("✅ All imports successful")
 except ImportError as e:
     print(f"❌ Import error: {e}")
@@ -42,16 +43,25 @@ def main():
     print("🎯 Firebase Monitoring System - Complete Demo")
     print("=" * 50)
     print("This demo will:")
-    print("1. Start the Firebase monitoring service")
+    print("1. Start the Firebase monitoring service with LangChain agent")
     print("2. Add a test flight search")
-    print("3. Show automatic processing")
+    print("3. Show automatic agent processing")
     print("4. Display results")
     print("=" * 50)
     
+    # Check if agent is available
+    if not agent:
+        print("❌ LangChain agent not available. Please check:")
+        print("   1. OPENAI_API_KEY is set in your .env file")
+        print("   2. All required dependencies are installed")
+        sys.exit(1)
+    
+    print("✅ LangChain agent is ready")
+    
     try:
         # Step 1: Start monitoring
-        print("\n📡 Step 1: Starting Firebase monitoring...")
-        listener = start_firebase_listener(poll_interval=3)
+        print("\n📡 Step 1: Starting Firebase monitoring with LangChain agent...")
+        listener = start_firebase_listener(agent=agent, poll_interval=3)
         print("✅ Monitoring service started (3-second polling)")
         
         # Wait for listener to initialize
@@ -68,14 +78,14 @@ def main():
         print(f"✅ {result}")
         
         # Step 3: Wait for automatic processing
-        print("\n⏳ Step 3: Waiting for automatic processing...")
-        print("   (The monitoring service will detect and process this automatically)")
+        print("\n⏳ Step 3: Waiting for automatic agent processing...")
+        print("   (The LangChain agent will detect and process this automatically)")
         
         # Wait long enough for processing
-        for i in range(10, 0, -1):
+        for i in range(15, 0, -1):
             print(f"   Waiting {i} seconds...", end="\\r")
             time.sleep(1)
-        print("   Processing should be complete!     ")
+        print("   Agent processing should be complete!     ")
         
         # Step 4: Show status
         print("\n📊 Step 4: Final status...")

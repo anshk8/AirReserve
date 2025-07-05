@@ -16,7 +16,6 @@ sys.path.insert(0, str(current_dir))
 try:
     from src.agent.firebase_listener import start_firebase_listener, stop_firebase_listener, get_firebase_listener
     from src.agent.tools.databaseTools import _save_flight_search_impl
-    from src.agent.tools.tavily_price_tracker import tavily_price_tracker
     print("✅ All imports successful")
 except ImportError as e:
     print(f"❌ Import error: {e}")
@@ -71,39 +70,51 @@ def test_firebase_database():
         return False
 
 def test_tavily_api():
-    """Test Tavily API connectivity"""
-    print("\n🌐 Testing Tavily API")
-    print("-" * 30)
-    
-    try:
-        # Test with a simple flight search
-        result = tavily_price_tracker.invoke({
-            "from_city": "Toronto",
-            "to_city": "Vancouver",
-            "max_price": "500"
-        })
-        
-        if "Error" not in result:
-            print("✅ Tavily API test passed")
-            print(f"   Sample result: {result[:100]}...")
-            return True
-        else:
-            print(f"❌ Tavily API test failed: {result}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Tavily API test error: {str(e)}")
-        return False
-
-def test_firebase_monitoring():
-    """Test Firebase monitoring system"""
-    print("\n📡 Testing Firebase Monitoring System")
+    """Test LangChain agent with Tavily API"""
+    print("\n🌐 Testing LangChain Agent with Tavily API")
     print("-" * 40)
     
     try:
-        # Start the listener
-        print("Starting Firebase listener...")
-        listener = start_firebase_listener(poll_interval=2)
+        # Import the agent from MCP server
+        from src.agent.MCPLangChainServer import agent
+        
+        if not agent:
+            print("❌ LangChain agent not initialized (missing OpenAI API key)")
+            return False
+        
+        # Test with a simple flight search using agent
+        prompt = "Get me flights from Toronto to Vancouver under $500"
+        response = agent.invoke({"input": prompt})
+        result = response.get("output", "No response from agent")
+        
+        if "Error" not in result:
+            print("✅ LangChain agent test passed")
+            print(f"   Sample result: {result[:100]}...")
+            return True
+        else:
+            print(f"❌ LangChain agent test failed: {result}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ LangChain agent test error: {str(e)}")
+        return False
+
+def test_firebase_monitoring():
+    """Test Firebase monitoring system with LangChain agent"""
+    print("\n📡 Testing Firebase Monitoring System with LangChain Agent")
+    print("-" * 55)
+    
+    try:
+        # Import agent from MCP server
+        from src.agent.MCPLangChainServer import agent
+        
+        if not agent:
+            print("❌ LangChain agent not available - skipping monitoring test")
+            return False
+        
+        # Start the listener with agent
+        print("Starting Firebase listener with LangChain agent...")
+        listener = start_firebase_listener(agent=agent, poll_interval=2)
         
         # Wait a moment for listener to initialize
         time.sleep(3)
@@ -118,7 +129,7 @@ def test_firebase_monitoring():
             return False
         
         # Add a test flight search that should trigger the listener
-        print("\n📝 Adding test flight search to trigger monitoring...")
+        print("\n📝 Adding test flight search to trigger agent...")
         result = _save_flight_search_impl(
             to_destination="Paris",
             from_origin="Toronto", 
@@ -128,17 +139,17 @@ def test_firebase_monitoring():
         print(f"   Database result: {result}")
         
         # Wait for the listener to process
-        print("⏳ Waiting 10 seconds for listener to detect and process...")
+        print("\n⏳ Waiting 10 seconds for agent to detect and process...")
         time.sleep(10)
         
         # Check updated status
         updated_status = listener.get_status()
-        print(f"   Updated status: {json.dumps(updated_status, indent=2)}")
+        print(f"\n📊 Updated status: {json.dumps(updated_status, indent=2)}")
         
         # Stop the listener
         print("\n🛑 Stopping Firebase listener...")
         stop_firebase_listener()
-        print("✅ Firebase monitoring test completed")
+        print("✅ Firebase monitoring test with agent completed")
         
         return True
         
@@ -158,7 +169,7 @@ def run_full_test():
     tests = [
         ("Environment Setup", test_environment_setup),
         ("Firebase Database", test_firebase_database),
-        ("Tavily API", test_tavily_api),
+        ("LangChain Agent", test_tavily_api),
         ("Firebase Monitoring", test_firebase_monitoring)
     ]
     

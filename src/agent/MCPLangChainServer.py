@@ -20,7 +20,11 @@ from .tools.databaseTools import (
     save_flight_search, 
     get_flight_searches
 )
-from .tools.tavily_price_tracker import tavily_price_tracker
+from .tools.simple_tools import (
+    save_flight_search_simple,
+    get_flight_searches_simple, 
+    search_flight_prices_simple
+)
 from .firebase_listener import (
     start_firebase_listener, 
     stop_firebase_listener, 
@@ -58,9 +62,9 @@ if llm:
     #tools are imports from tools/ folder
     langchain_tools = [
         search_destinations,
-        save_flight_search,
-        get_flight_searches,
-        tavily_price_tracker
+        save_flight_search_simple,
+        get_flight_searches_simple,
+        search_flight_prices_simple
     ]
 
     
@@ -68,7 +72,7 @@ if llm:
     agent = initialize_agent(
         tools=langchain_tools,
         llm=llm,
-        agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
+        agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
         verbose=True,
         memory=memory,
         handle_parsing_errors=True,
@@ -187,8 +191,11 @@ def start_monitoring_firebase(poll_interval: int = 5) -> str:
         Status message about the monitoring service
     """
     try:
-        listener = start_firebase_listener(poll_interval)
-        return f"✅ Firebase monitoring started! Checking for new flight searches every {poll_interval} seconds. When new entries are detected, Tavily API will be called automatically."
+        if not agent:
+            return "❌ Cannot start monitoring: LangChain agent not initialized. Please check OPENAI_API_KEY."
+        
+        listener = start_firebase_listener(agent=agent, poll_interval=poll_interval)
+        return f"✅ Firebase monitoring started with LangChain agent! Checking for new flight searches every {poll_interval} seconds. When new entries are detected, the agent will search for flights using natural language prompts."
     except Exception as e:
         return f"❌ Error starting Firebase monitoring: {str(e)}"
 
@@ -224,7 +231,7 @@ def get_monitoring_status() -> str:
 
 @mcp.tool()
 def search_flight_prices(from_city: str, to_city: str, max_price: str) -> str:
-    """Search for flight prices using Tavily API.
+    """Search for flight prices using the LangChain agent with Tavily tools.
     
     Args:
         from_city: Origin city name
@@ -232,33 +239,17 @@ def search_flight_prices(from_city: str, to_city: str, max_price: str) -> str:
         max_price: Maximum price threshold as string
     
     Returns:
-        Flight price information from Tavily API
+        Flight price information from the LangChain agent
     """
-    return tavily_price_tracker(from_city, to_city, max_price)
+    if not agent:
+        return "❌ Cannot search flights: LangChain agent not initialized. Please check OPENAI_API_KEY."
     
-@mcp.listener()
-def firebase_listener() -> None:
-    """Start the Firebase listener for real-time updates."""
-    start_firebase_listener()
-
-@mcp.action()
-def on_flight_search_saved(data: dict) -> None:
-    """Action to perform when a flight search is saved.
-    
-    Args:
-        data: The data payload from Firebase
-    """
-    print("Flight search saved:", data)
-
-@mcp.action()
-def on_flight_search_deleted(data: dict) -> None:
-    """Action to perform when a flight search is deleted.
-    
-    Args:
-        data: The data payload from Firebase
-    """
-    print("Flight search deleted:", data)
-
+    try:
+        prompt = f"Get me flights from {from_city} to {to_city} under ${max_price}"
+        response = agent.invoke({"input": prompt})
+        return response.get("output", "No response from agent")
+    except Exception as e:
+        return f"❌ Error from LangChain agent: {str(e)}"
 if __name__ == "__main__":
     # Run the server
     mcp.run()

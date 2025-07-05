@@ -15,7 +15,8 @@ sys.path.insert(0, str(parent_dir))
 
 try:
     from src.agent.firebase_listener import start_firebase_listener, stop_firebase_listener
-    print("✅ Successfully imported Firebase listener")
+    from src.agent.MCPLangChainServer import agent
+    print("✅ Successfully imported Firebase listener and LangChain agent")
 except ImportError as e:
     print(f"❌ Error importing Firebase listener: {e}")
     print("Make sure you're running this from the correct directory")
@@ -26,8 +27,17 @@ def main():
     print("🔥 AirReserve Firebase Monitoring Service")
     print("=" * 50)
     print("This service monitors Firebase for new flight searches")
-    print("and automatically calls Tavily API when new entries are detected.")
+    print("and automatically calls LangChain agent (with Tavily tools) when new entries are detected.")
     print("=" * 50)
+    
+    # Check if agent is available
+    if not agent:
+        print("❌ LangChain agent not available. Please check:")
+        print("   1. OPENAI_API_KEY is set in your .env file")
+        print("   2. All required dependencies are installed")
+        sys.exit(1)
+    
+    print("✅ LangChain agent is ready")
     
     # Get poll interval from command line or use default
     poll_interval = 5
@@ -37,14 +47,14 @@ def main():
         except ValueError:
             print("⚠️ Invalid poll interval provided. Using default of 5 seconds.")
     
-    print(f"📡 Starting monitoring (checking every {poll_interval} seconds)")
-    print("💡 Tip: Add flight searches through your UI to see the system in action!")
+    print(f"📡 Starting monitoring with LangChain agent (checking every {poll_interval} seconds)")
+    print("💡 Tip: Add flight searches through your UI to see the agent in action!")
     print("🛑 Press Ctrl+C to stop the service")
     print()
     
     try:
-        # Start the listener
-        listener = start_firebase_listener(poll_interval)
+        # Start the listener with agent
+        listener = start_firebase_listener(agent=agent, poll_interval=poll_interval)
         
         # Keep the service running
         while True:
