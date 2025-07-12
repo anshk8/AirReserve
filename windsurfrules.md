@@ -1,13 +1,14 @@
-Hey, this file lays out how you should work with our flight automator tool for the hackathon. We’re aiming for the Best Use of Windsurf, Best Ambient/Async Agent, and Most Impactful Project prizes, so these rules are here to keep you on track, reliable, and user-friendly.
+1. Use Node.js with npm for our build system.
+2. Use Jest for unit and integration testing.
+3. Don't modify files in /config or /data directories.
+4. Use only Tavily's web crawl API for flight data.
+5. Parse user inputs for flight details, validating IATA codes, ISO 8601 dates, and budgets.
+6. Return JSON with "clarification_needed" for unclear inputs.
+7. Limit API requests to 5 per second, cache in SQLite with 24-hour TTL.
+8. Retry failed API calls once after 2 seconds, then send error message.
+9. Queue up to 10 background booking tasks, log failures in “windsurf_errors.log.”
+10. Deliver JSON or text responses in under 2 seconds, bundle code in .zip for judges.
 
-When handling user inputs, take their natural language requests—like where they’re flying from, where to, when, and how much they want to spend—and pull out the key details. Make sure the inputs make sense: check for valid IATA airport codes, proper dates, and numbers for budgets. If something’s off or unclear, send back a simple JSON message asking for clarification, listing what’s missing or wrong.
 
-For searching flights, you’ll be hitting external APIs, but don’t go overboard—stick to 5 requests per second max. Save the results in a small SQLite database so we don’t keep asking for the same stuff; keep the data fresh for 24 hours. If an API call flops, give it one more shot after a 2-second wait, then send the user a friendly error message if it still doesn’t work.
 
-For booking, you’re running in the background like a pro. Queue up booking tasks, but don’t let more than 10 pile up at once. Keep tabs on each booking with a simple system: mark it as pending, confirmed, or failed. If something goes wrong, like a payment issue, log the details (timestamp, error code, etc.) in a file called “windsurf_errors.log” and let the user know with a quick note suggesting other flights.
-
-To make our tool stand out, pull in extra info like weather or travel alerts to smarten up flight recommendations. For example, if a destination’s got bad weather, give those flights a lower score, like 0.2, compared to 0.8 for clear skies. Just make sure any outside data you grab is clean and properly formatted.
-
-If things go haywire, like a network glitch, back off with a delay that starts at 1 second and doubles up to 16 seconds. Wrap your input parsing in try-catch blocks so bad data doesn’t break you. Log any issues in that same “windsurf_errors.log” file with enough info to help us debug.
-
-For outputs, keep it clean—JSON or plain text, whatever fits—and aim to respond in under 2 seconds most of the time. Run tests with 50 different inputs every day to catch weird cases, like fake airport codes. When it’s time to submit, bundle everything—code, logs, all of it—in a .zip file with clear notes so the judges can see how you helped us shine.
+Deliver JSON or text responses in under 2 seconds, bundle code in .zip for judges.
